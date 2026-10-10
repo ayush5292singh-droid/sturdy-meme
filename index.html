@@ -1,1 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b09">
+  <meta name="color-scheme" content="dark">
+  <title>FINOCA — Smart Money OS</title>
 
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root,
+    [data-theme="light"] {
+      color-scheme: dark;
+      --bg: #080b09;
+      --panel: #101510;
+      --panel-2: #151d16;
+      --panel-3: #202b21;
+      --text: #f1f8f0;
+      --muted: #96a596;
+      --border: rgba(133, 255, 143, .13);
+      --cyan: #66ff76;
+      --purple: #a1ff65;
+      --green: #66ff76;
+      --red: #ff7580;
+      --yellow: #e5ff76;
+      --shadow: 0 16px 42px rgba(0, 0, 0, .32);
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse at 85% 0%,
+          rgba(48, 255, 92, .07), transparent 34%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    button, .stat-card, .panel, .wallet-card,
+    .budget-card, .goal-card, .loan-card,
+    .report-option, .pro-card {
+      transition:
+        transform .22s ease,
+        border-color .22s ease,
+        box-shadow .22s ease,
+        background .22s ease;
+    }
+
+    .brand-logo {
+      color: #071008;
+      background: linear-gradient(135deg, #a5ff8c, #36e956);
+      border: 1px solid rgba(160, 255, 140, .5);
+      box-shadow: 0 0 26px rgba(68, 255, 87, .16);
+    }
+
+    .brand h1 span {
+      color: var(--green);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(
+        90deg,
+        rgba(91, 255, 105, .15),
+        rgba(91, 255, 105, .035)
+      );
+      color: var(--green);
+      border-left: 3px solid var(--green);
+      box-shadow: inset 0 0 20px rgba(91, 255, 105, .025);
+    }
+
+    .nav-btn:hover {
+      color: var(--green);
+      background: var(--panel-2);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #a5ff8c, #42ed5e);
+      color: #071008;
+      box-shadow: 0 5px 20px rgba(66, 237, 94, .13);
+    }
+
+    .primary-btn:hover {
+      box-shadow: 0 7px 24px rgba(66, 237, 94, .25);
+    }
+
+    .premium-mini {
+      border-color: rgba(102, 255, 118, .25);
+      background: linear-gradient(
+        145deg,
+        rgba(102, 255, 118, .10),
+        rgba(102, 255, 118, .025)
+      );
+    }
+
+    .premium-mini strong,
+    .premium-mini button,
+    .quick-actions span,
+    .storage-status {
+      color: var(--green);
+    }
+
+    .premium-mini button {
+      background: var(--green);
+      color: #061008;
+    }
+
+    .panel, .stat-card, .wallet-card,
+    .budget-card, .goal-card, .loan-card,
+    .report-option, .pro-card {
+      backdrop-filter: blur(12px);
+    }
+
+    .stat-card:hover, .panel:hover,
+    .wallet-card:hover, .budget-card:hover,
+    .goal-card:hover, .loan-card:hover {
+      border-color: rgba(102, 255, 118, .28);
+    }
+
+    .badge {
+      background: rgba(102, 255, 118, .09);
+      color: var(--green);
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, #35db50, #b4ff82);
+      box-shadow: 0 0 12px rgba(102, 255, 118, .22);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(102, 255, 118, .07);
+    }
+
+    .page {
+      animation: finoPageIn .32s ease both;
+    }
+
+    @keyframes finoPageIn {
+      from {
+        opacity: 0;
+        transform: translateY(9px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* FINOCA virtual balance card */
+    .fino-hero {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      width: 100%;
+      max-width: 650px;
+      min-height: 215px;
+      margin: 0 0 22px;
+      padding: 25px 27px;
+      border: 1px solid rgba(160, 255, 140, .32);
+      border-radius: 23px;
+      color: #f3fff1;
+      background:
+        radial-gradient(
+          circle at 100% 0%,
+          rgba(105, 255, 107, .20),
+          transparent 43%
+        ),
+        linear-gradient(125deg, #17221a, #080d09 63%, #101b11);
+      box-shadow:
+        0 15px 45px rgba(0, 0, 0, .30),
+        inset 0 1px rgba(255, 255, 255, .055);
+      animation: finoCardIn .65s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .fino-hero::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 210px;
+      height: 210px;
+      right: -65px;
+      bottom: -115px;
+      border: 1px solid rgba(102, 255, 118, .24);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 24px rgba(102, 255, 118, .025),
+        0 0 0 48px rgba(102, 255, 118, .02);
+    }
+
+    .fino-hero-top,
+    .fino-hero-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .fino-brand {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2.6px;
+    }
+
+    .fino-brand span {
+      color: #83ff86;
+    }
+
+    .fino-virtual {
+      padding: 6px 9px;
+      border: 1px solid rgba(150, 255, 150, .23);
+      border-radius: 20px;
+      color: #a7f8a5;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+    }
+
+    .fino-chip {
+      width: 39px;
+      height: 29px;
+      margin-top: 24px;
+      border: 1px solid rgba(225, 255, 191, .5);
+      border-radius: 7px;
+      background:
+        linear-gradient(90deg, transparent 47%, rgba(0,0,0,.25) 48%, transparent 52%),
+        linear-gradient(0deg, transparent 45%, rgba(0,0,0,.22) 47%, transparent 52%),
+        linear-gradient(135deg, #d8e8a8, #87966b);
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+
+    .fino-balance-label {
+      margin-top: 19px;
+      color: #a0b09f;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.7px;
+    }
+
+    .fino-balance {
+      margin: 7px 0 21px;
+      font-size: clamp(27px, 5vw, 38px);
+      font-weight: 850;
+      letter-spacing: -1.2px;
+      overflow-wrap: anywhere;
+      color: #f4fff2;
+    }
+
+    .fino-hero-bottom {
+      color: #9eaf9c;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+    }
+
+    .fino-card-mark {
+      color: #9bff92;
+      font-size: 23px;
+      font-weight: 950;
+      font-style: italic;
+      letter-spacing: -1px;
+    }
+
+    @keyframes finoCardIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .main {
+        margin-left: 0;
+        padding: 17px 13px 28px;
+      }
+
+      .topbar {
+        gap: 9px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .topbar h2 {
+        font-size: 21px;
+      }
+
+      .top-actions {
+        gap: 7px;
+      }
+
+      .primary-btn {
+        padding: 10px 11px;
+        font-size: 12px;
+      }
+
+      .fino-hero {
+        min-height: 205px;
+        padding: 22px 20px;
+        border-radius: 20px;
+        margin-bottom: 17px;
+      }
+
+      .fino-balance {
+        font-size: clamp(25px, 7vw, 34px);
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .stat-card {
+        padding: 14px;
+        min-width: 0;
+      }
+
+      .stat-value {
+        font-size: clamp(18px, 4.7vw, 24px);
+        overflow-wrap: anywhere;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      .panel {
+        padding: 15px;
+        border-radius: 15px;
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .quick-actions button {
+        padding: 14px 11px;
+        min-width: 0;
+      }
+
+      .toolbar, .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .cards-grid, .report-grid, .pro-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">₣</div>
+        <div>
+          <h1>FINOCA<span> 3.0</span></h1>
+          <small>SMART MONEY OS</small>
+        </div>
+      </div>
+
+      <button class="mobile-close"
+              onclick="toggleSidebar()">×</button>
+
+      <nav>
+        <button class="nav-btn active" data-page="dashboard">⌂ <span>Dashboard</span></button>
+        <button class="nav-btn" data-page="transactions">⇄ <span>Transactions</span></button>
+        <button class="nav-btn" data-page="wallets">▣ <span>Wallets</span></button>
+        <button class="nav-btn" data-page="budgets">◫ <span>Budgets</span></button>
+        <button class="nav-btn" data-page="goals">◎ <span>Savings Goals</span></button>
+        <button class="nav-btn" data-page="loans">▰ <span>Loans</span></button>
+        <button class="nav-btn" data-page="recurring">↻ <span>Recurring</span></button>
+        <button class="nav-btn" data-page="receipts">▤ <span>Receipt Scanner</span></button>
+        <button class="nav-btn" data-page="analytics">◈ <span>Analytics</span></button>
+        <button class="nav-btn" data-page="reports">▥ <span>Reports</span></button>
+        <button class="nav-btn" data-page="pro">✦ <span>Finance Pro</span></button>
+        <button class="nav-btn" data-page="backup">⬡ <span>Backup & Restore</span></button>
+        <button class="nav-btn" data-page="settings">⚙ <span>Settings</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="premium-mini">
+          <strong>FINANCE PRO</strong>
+          <p>Unlock advanced money tools.</p>
+          <button onclick="showPremium()">Upgrade ₹99/month</button>
+        </div>
+        <div class="storage-status">● Offline storage active</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn"
+                onclick="toggleSidebar()">☰</button>
+
+        <div>
+          <div class="eyebrow">
+            PERSONAL FINANCIAL COMMAND CENTER
+          </div>
+          <h2 id="page-title">Dashboard</h2>
+        </div>
+
+        <div class="top-actions">
+          <button class="icon-btn"
+                  onclick="toggleTheme()"
+                  title="Change theme">◐</button>
+          <button class="primary-btn"
+                  onclick="openTransactionModal()">
+            + Add transaction
+          </button>
+        </div>
+      </header>
+
+      <div id="app-content"></div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop"
+       id="modal-backdrop"
+       onclick="closeModal(event)">
+    <div class="modal"
+         id="modal-box"
+         onclick="event.stopPropagation()"></div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Keep your existing application logic -->
+  <script src="script.js"></script>
+
+  <script>
+    (() => {
+      const content = document.getElementById("app-content");
+      const title = document.getElementById("page-title");
+
+      function updateFinoCard() {
+        if (!content || !title) return;
+
+        const isDashboard =
+          title.textContent.trim().toLowerCase() === "dashboard";
+
+        let card = document.getElementById("fino-balance-card");
+
+        if (!isDashboard) {
+          if (card) card.remove();
+
+          content.querySelectorAll(".stat-card")
+            .forEach(el => el.classList.remove("fino-replaced"));
+
+          return;
+        }
+
+        const balanceBox =
+          content.querySelector(".stats-grid .stat-card");
+
+        if (!balanceBox) return;
+
+        const balance =
+          balanceBox.querySelector(".stat-value");
+
+        if (!balance) return;
+
+        if (!card) {
+          card = document.createElement("section");
+          card.id = "fino-balance-card";
+          card.className = "fino-hero";
+          card.setAttribute("aria-label", "FINOCA virtual balance card");
+
+          card.innerHTML = `
+            <div class="fino-hero-top">
+              <div class="fino-brand">FINOCA<span>®</span></div>
+              <span class="fino-virtual">VIRTUAL DISPLAY</span>
+            </div>
+            <div class="fino-chip" aria-hidden="true"></div>
+            <div class="fino-balance-label">TOTAL AVAILABLE BALANCE</div>
+            <div class="fino-balance" id="fino-balance-value">₹0</div>
+            <div class="fino-hero-bottom">
+              <span>YOUR MONEY. YOUR CONTROL.</span>
+              <span class="fino-card-mark">FINOCA</span>
+            </div>
+          `;
+
+          content.insertBefore(card, content.firstChild);
+        }
+
+        const display = document.getElementById("fino-balance-value");
+
+        if (display) {
+          display.textContent = balance.textContent.trim();
+        }
+
+        balanceBox.classList.add("fino-replaced");
+      }
+
+      const style = document.createElement("style");
+      style.textContent = `
+        .stats-grid .stat-card.fino-replaced {
+          display: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      const observer = new MutationObserver(updateFinoCard);
+      observer.observe(content, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+
+      updateFinoCard();
+    })();
+  </script>
+</body>
+</html>
